@@ -1,0 +1,14 @@
+# Base Django
+Django==4.2  # Assurez-vous d'utiliser une version compatible avec votre projet
+
+# Gestion des utilisateurs et permissions
+djangorestframework==3.14.0  # Pour créer des API REST
+
+# Gestion des images
+Pillow==9.4.0  # Pour le support des images dans Django
+
+# Intégration de paiement avec Stripe
+stripe==4.4.0  # Pour les paiements en ligne avec Stripe
+
+# Autres bibliothèques optionnelles pour la recherche
+django-filter==23.2  # Pour la recherche avancée
