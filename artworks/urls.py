@@ -1,9 +1,10 @@
-from django.urls import path
-from .views import ArtworkListView, ArtworkDetailView, ArtistListView, ArtistDetailView
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from artworks.views import ArtworkViewSet
+
+router = DefaultRouter()
+router.register(r'artworks', ArtworkViewSet)
 
 urlpatterns = [
-    path('artworks/', ArtworkListView.as_view(), name='artwork-list'),
-    path('artworks/<int:pk>/', ArtworkDetailView.as_view(), name='artwork-detail'),
-    path('artists/', ArtistListView.as_view(), name='artist-list'),
-    path('artists/<int:pk>/', ArtistDetailView.as_view(), name='artist-detail'),
+    path('', include(router.urls)),
 ]

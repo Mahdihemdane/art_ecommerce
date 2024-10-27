@@ -1,53 +1,41 @@
-from django.shortcuts import render, get_object_or_404, redirect
-from django.views import View
-from .models import Artwork, Artist
-from django.contrib.auth.decorators import login_required
-from django.utils.decorators import method_decorator
-from .forms import ArtworkForm
+from rest_framework import viewsets
+from rest_framework.permissions import IsAuthenticated
+from .models import Artwork
+from .serializers import ArtworkSerializer
+from rest_framework.response import Response
+from rest_framework import status
 
-class ArtworkListView(View):
-    def get(self, request):
-        artworks = Artwork.objects.all()
-        return render(request, 'artworks/artwork_list.html', {'artworks': artworks})
+class ArtworkViewSet(viewsets.ModelViewSet):
+    queryset = Artwork.objects.all()
+    serializer_class = ArtworkSerializer
+    permission_classes = [IsAuthenticated]  # Assurez-vous que l'utilisateur est authentifié
 
-class ArtworkDetailView(View):
-    def get(self, request, pk):
-        artwork = get_object_or_404(Artwork, pk=pk)
-        return render(request, 'artworks/artwork_detail.html', {'artwork': artwork})
+    def list(self, request):
+        artworks = self.get_queryset()
+        serializer = self.get_serializer(artworks, many=True)
+        return Response(serializer.data)
 
-@method_decorator(login_required, name='dispatch')
-class ArtworkCreateView(View):
-    def get(self, request):
-        form = ArtworkForm()
-        return render(request, 'artworks/artwork_form.html', {'form': form})
+    def retrieve(self, request, pk=None):
+        artwork = self.get_object()
+        serializer = self.get_serializer(artwork)
+        return Response(serializer.data)
 
-    def post(self, request):
-        form = ArtworkForm(request.POST, request.FILES)
-        if form.is_valid():
-            artwork = form.save(commit=False)
-            artwork.artist = Artist.objects.get(user=request.user)
-            artwork.save()
-            return redirect('artwork_list')
-        return render(request, 'artworks/artwork_form.html', {'form': form})
+    def create(self, request):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(artist=request.user.artist)  # Assurez-vous que l'artiste est défini correctement
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-@method_decorator(login_required, name='dispatch')
-class ArtworkUpdateView(View):
-    def get(self, request, pk):
-        artwork = get_object_or_404(Artwork, pk=pk)
-        form = ArtworkForm(instance=artwork)
-        return render(request, 'artworks/artwork_form.html', {'form': form})
+    def update(self, request, pk=None):
+        artwork = self.get_object()
+        serializer = self.get_serializer(artwork, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def post(self, request, pk):
-        artwork = get_object_or_404(Artwork, pk=pk)
-        form = ArtworkForm(request.POST, request.FILES, instance=artwork)
-        if form.is_valid():
-            form.save()
-            return redirect('artwork_detail', pk=artwork.pk)
-        return render(request, 'artworks/artwork_form.html', {'form': form})
-
-@method_decorator(login_required, name='dispatch')
-class ArtworkDeleteView(View):
-    def post(self, request, pk):
-        artwork = get_object_or_404(Artwork, pk=pk)
+    def destroy(self, request, pk=None):
+        artwork = self.get_object()
         artwork.delete()
-        return redirect('artwork_list')
+        return Response(status=status.HTTP_204_NO_CONTENT)

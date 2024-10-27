@@ -30,6 +30,3 @@ class Order(models.Model):
 
     def __str__(self):
         return f'Order {self.id} by {self.user}'
-
-# Ajoutez d'autres modèles comme `Review`, `Category`, etc. si nécessaire
-
