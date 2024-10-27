@@ -1,11 +1,9 @@
-from django.urls import path, include
-from rest_framework.routers import DefaultRouter
-from .views import ArtworkViewSet, CartViewSet
-
-router = DefaultRouter()
-router.register(r'artworks', ArtworkViewSet)
-router.register(r'carts', CartViewSet)
+from django.urls import path
+from .views import UserListView, UserDetailView, UserProfileListView, UserProfileDetailView
 
 urlpatterns = [
-    path('', include(router.urls)),
+    path('users/', UserListView.as_view(), name='user-list'),
+    path('users/<int:pk>/', UserDetailView.as_view(), name='user-detail'),
+    path('profiles/', UserProfileListView.as_view(), name='userprofile-list'),
+    path('profiles/<int:pk>/', UserProfileDetailView.as_view(), name='userprofile-detail'),
 ]

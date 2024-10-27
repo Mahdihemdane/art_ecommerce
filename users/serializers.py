@@ -1,12 +1,15 @@
 from rest_framework import serializers
-from .models import Artwork, Cart
+from django.contrib.auth.models import User
+from .models import UserProfile
 
-class ArtworkSerializer(serializers.ModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Artwork
-        fields = '__all__'
+        model = User
+        fields = ['id', 'username', 'email']  # Ajoutez les champs que vous souhaitez exposer
 
-class CartSerializer(serializers.ModelSerializer):
+class UserProfileSerializer(serializers.ModelSerializer):
+    user = UserSerializer(read_only=True)
+
     class Meta:
-        model = Cart
-        fields = '__all__'
+        model = UserProfile
+        fields = ['id', 'user', 'role', 'bio']  # Ajoutez les champs que vous souhaitez exposer

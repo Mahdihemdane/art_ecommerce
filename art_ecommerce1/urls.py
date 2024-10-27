@@ -1,11 +1,15 @@
-# art_ecommerce/urls.py
+
+# art_ecommerce1/urls.py
 from django.contrib import admin
 from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from cart.views import CartViewSet  # Exemple d'importation
+
+# Créez un routeur
+router = DefaultRouter()
+router.register(r'cart', CartViewSet)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/artworks/', include('artworks.urls')),
-    path('api/cart/', include('cart.urls')),
-    path('api/orders/', include('orders.urls')),
-    path('api/payment/', include('payment.urls')),
+    path('', include(router.urls)),  # Assurez-vous que c'est correct
 ]

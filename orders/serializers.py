@@ -1,7 +1,13 @@
 from rest_framework import serializers
-from .models import Order  # Assurez-vous d'importer le modèle Order
+from .models import Cart  # Assurez-vous que l'importation est correcte
+from users.models import Artwork  # Importez Artwork si nécessaire
 
-class OrderSerializer(serializers.ModelSerializer):
+class ArtworkSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Order
-        fields = '__all__'  # ou une liste de champs spécifiques
+        model = Artwork
+        fields = '__all__'
+
+class CartSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Cart
+        fields = '__all__'

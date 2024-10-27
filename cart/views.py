@@ -1,6 +1,9 @@
+# cart/views.py
+
 from rest_framework import viewsets, permissions
-from .models import Cart, CartItem
-from .serializers import CartSerializer, CartItemSerializer
+from rest_framework.response import Response
+from .models import Cart, CartItem, Payment
+from .serializers import CartSerializer, CartItemSerializer, PaymentSerializer
 
 class CartViewSet(viewsets.ModelViewSet):
     queryset = Cart.objects.all()
@@ -17,3 +20,11 @@ class CartItemViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return self.queryset.filter(cart__user=self.request.user)
+
+class PaymentViewSet(viewsets.ModelViewSet):
+    queryset = Payment.objects.all()
+    serializer_class = PaymentSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)

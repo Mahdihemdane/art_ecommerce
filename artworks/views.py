@@ -1,39 +1,53 @@
-# artworks/views.py
+from django.shortcuts import render, get_object_or_404, redirect
+from django.views import View
+from .models import Artwork, Artist
+from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
+from .forms import ArtworkForm
 
-from django.shortcuts import render, redirect
-from django.http import HttpResponse
-from .models import Artwork
-from .forms import ArtworkForm, UserRegistrationForm
-from django.contrib.auth import login, authenticate
+class ArtworkListView(View):
+    def get(self, request):
+        artworks = Artwork.objects.all()
+        return render(request, 'artworks/artwork_list.html', {'artworks': artworks})
 
-def register(request):
-    if request.method == 'POST':
-        form = UserRegistrationForm(request.POST)
+class ArtworkDetailView(View):
+    def get(self, request, pk):
+        artwork = get_object_or_404(Artwork, pk=pk)
+        return render(request, 'artworks/artwork_detail.html', {'artwork': artwork})
+
+@method_decorator(login_required, name='dispatch')
+class ArtworkCreateView(View):
+    def get(self, request):
+        form = ArtworkForm()
+        return render(request, 'artworks/artwork_form.html', {'form': form})
+
+    def post(self, request):
+        form = ArtworkForm(request.POST, request.FILES)
         if form.is_valid():
-            user = form.save()
-            username = form.cleaned_data.get('username')
-            raw_password = form.cleaned_data.get('password1')
-            user = authenticate(username=username, password=raw_password)
-            login(request, user)
-            return redirect('artworks:artwork_list')  # Redirige vers la liste des œuvres d'art
-    else:
-        form = UserRegistrationForm()
-    return render(request, 'artworks/register.html', {'form': form})
+            artwork = form.save(commit=False)
+            artwork.artist = Artist.objects.get(user=request.user)
+            artwork.save()
+            return redirect('artwork_list')
+        return render(request, 'artworks/artwork_form.html', {'form': form})
 
-def artwork_list(request):
-    artworks = Artwork.objects.all()
-    return render(request, 'artworks/artwork_list.html', {'artworks': artworks})
+@method_decorator(login_required, name='dispatch')
+class ArtworkUpdateView(View):
+    def get(self, request, pk):
+        artwork = get_object_or_404(Artwork, pk=pk)
+        form = ArtworkForm(instance=artwork)
+        return render(request, 'artworks/artwork_form.html', {'form': form})
 
-def artwork_create(request):
-    if request.method == 'POST':
-        form = ArtworkForm(request.POST, request.FILES)  # Inclut FILES pour les fichiers d'image
+    def post(self, request, pk):
+        artwork = get_object_or_404(Artwork, pk=pk)
+        form = ArtworkForm(request.POST, request.FILES, instance=artwork)
         if form.is_valid():
             form.save()
-            return redirect('artworks:artwork_list')  # Redirige vers la liste des œuvres d'art
-    else:
-        form = ArtworkForm()
-    return render(request, 'artworks/artwork_form.html', {'form': form})
+            return redirect('artwork_detail', pk=artwork.pk)
+        return render(request, 'artworks/artwork_form.html', {'form': form})
 
-def artwork_detail(request, pk):
-    artwork = Artwork.objects.get(pk=pk)
-    return render(request, 'artworks/artwork_detail.html', {'artwork': artwork})
+@method_decorator(login_required, name='dispatch')
+class ArtworkDeleteView(View):
+    def post(self, request, pk):
+        artwork = get_object_or_404(Artwork, pk=pk)
+        artwork.delete()
+        return redirect('artwork_list')

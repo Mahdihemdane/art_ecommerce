@@ -1,7 +1,14 @@
 from rest_framework import serializers
-from .models import Artwork  # Assurez-vous que ce modèle est défini dans models.py
+from .models import Artwork, Artist
+
+class ArtistSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Artist
+        fields = ['id', 'user', 'bio', 'website']  # Ajoutez les champs que vous souhaitez exposer
 
 class ArtworkSerializer(serializers.ModelSerializer):
+    artist = ArtistSerializer(read_only=True)
+
     class Meta:
         model = Artwork
-        fields = '__all__'  # Ou une liste de champs spécifiques
+        fields = ['id', 'title', 'description', 'image', 'price', 'artist', 'created_at', 'updated_at']

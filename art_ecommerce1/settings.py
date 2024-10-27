@@ -41,7 +41,7 @@ INSTALLED_APPS = [
     'users',
     'cart',
     'orders',
-    'payment',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
@@ -130,3 +130,8 @@ STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 AUTH_USER_MODEL = 'users.User'
 
+# settings.py
+import os
+
+STRIPE_TEST_PUBLIC_KEY = os.environ.get('STRIPE_TEST_PUBLIC_KEY')
+STRIPE_TEST_SECRET_KEY = os.environ.get('STRIPE_TEST_SECRET_KEY')
